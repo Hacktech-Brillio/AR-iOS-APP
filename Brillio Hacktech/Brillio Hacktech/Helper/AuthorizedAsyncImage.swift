@@ -16,8 +16,19 @@ class ImageCache {
 
 class ImageLoader: ObservableObject {
     @Published var image: UIImage?
+    private var currentIndex = 0
+    private var urls: [URL] = []
     
-    func loadImage(from url: URL) {
+    func loadImages(from urls: [String]) {
+        self.urls = urls.compactMap { URL(string: $0) }
+        currentIndex = 0
+        loadImage()
+    }
+    
+    private func loadImage() {
+        guard currentIndex < urls.count else { return } // Stop if no more images
+        
+        let url = urls[currentIndex]
         let cacheKey = NSString(string: url.absoluteString)
 
         if let cachedImage = ImageCache.shared.object(forKey: cacheKey) {
@@ -34,6 +45,8 @@ class ImageLoader: ObservableObject {
                   (200...299).contains(httpResponse.statusCode),
                   let data = data,
                   let uiImage = UIImage(data: data) else {
+                self.currentIndex += 1 // Move to the next URL
+                self.loadImage() // Attempt loading the next image
                 return
             }
 
@@ -47,7 +60,7 @@ class ImageLoader: ObservableObject {
 }
 
 struct AuthorizedAsyncImage: View {
-    let name: String
+    let urls: [String]
     @StateObject private var loader = ImageLoader()
     
     var body: some View {
@@ -59,9 +72,7 @@ struct AuthorizedAsyncImage: View {
             } else {
                 ProgressView()
                     .onAppear {
-                        if let url = URL(string: name) {
-                            loader.loadImage(from: url)
-                        }
+                        loader.loadImages(from: urls)
                     }
             }
         }

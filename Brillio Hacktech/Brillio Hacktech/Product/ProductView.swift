@@ -19,14 +19,23 @@ struct ProductView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
+            
+            if reviews.count <= 0{
+                Spacer()
+            }
+            
             HStack{
                 Spacer()
-                AuthorizedAsyncImage(name: product.stores.first?.image ?? "")
+                AuthorizedAsyncImage(urls: product.stores.map { $0.image ?? "" })
                     .frame(height: 200)
                 Spacer()
                 
             }
             
+            if reviews.count <= 0{
+                Spacer()
+            }
+
             ScrollView(.horizontal) {
                 HStack(spacing: 15) {
                     ForEach(product.stores.sorted { ($0.price?.list != nil) && ($1.price?.list == nil) }) { store in
@@ -45,22 +54,21 @@ struct ProductView: View {
             }
             .padding(.horizontal)
 
-
-
-
-            ZStack{
-                RoundedRectangle(cornerRadius: 20)
-                    .edgesIgnoringSafeArea(.bottom)
-                    .foregroundStyle(.bar)
-                ScrollView{
-                    VStack(spacing: 20){
-                        ForEach(reviews){review in
-                            ReviewBox(review: review)
+            if reviews.count > 0{
+                ZStack{
+                    RoundedRectangle(cornerRadius: 20)
+                        .edgesIgnoringSafeArea(.bottom)
+                        .foregroundStyle(.bar)
+                    ScrollView{
+                        VStack(spacing: 20){
+                            ForEach(reviews){review in
+                                ReviewBox(review: review)
+                            }
+                            //    ContentViewReviews()
                         }
-                    //    ContentViewReviews()
+                        .padding(.horizontal)
+                        .padding(.top, 20)
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
                 }
             }
         }

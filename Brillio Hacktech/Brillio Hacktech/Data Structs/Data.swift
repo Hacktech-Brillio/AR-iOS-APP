@@ -15,10 +15,10 @@ struct ProductInfo: Codable {
 
 struct ProductProperties: Codable {
     let title: [String]
-    let description: [String]?
-    let brand: String? // Updated to String to handle single brand name
-    let manufacturer: String? // Updated to String for single manufacturer name
-    let mpn: String? // Updated to single String type
+    let description: [String]? // Flexible handling of `description`
+    let brand: String?
+    let manufacturer: String?
+    let mpn: String?
     let features: [String]?
     let itemWeight: String?
     let partNumber: String?
@@ -26,8 +26,6 @@ struct ProductProperties: Codable {
     let ingredients: String?
     let directions: String?
     let warning: String?
-    
-    // Additional fields based on JSON response
     let label: String?
     let distributorAddress: String?
     let distributorName: String?
@@ -36,8 +34,11 @@ struct ProductProperties: Codable {
     let usage: String?
     let spf: String?
     let volume: String?
-
-    // Map JSON keys that use different naming conventions
+    let color: String?
+    let material: String?
+    let model: String?
+    let age: String?
+    
     enum CodingKeys: String, CodingKey {
         case title, description, brand, manufacturer, mpn, features
         case itemWeight = "item weight"
@@ -47,8 +48,51 @@ struct ProductProperties: Codable {
         case distributorAddress = "distributor address"
         case distributorName = "distributor name"
         case gender, formulation, usage, spf, volume
+        case color, material, model, age
+    }
+    
+    // Custom initializer to handle both single String and [String] cases for `description`
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        title = try container.decode([String].self, forKey: .title)
+        
+        // Decode `description` as either [String] or a single String
+        if let descriptionArray = try? container.decode([String].self, forKey: .description) {
+            description = descriptionArray
+        } else if let descriptionString = try? container.decode(String.self, forKey: .description) {
+            description = [descriptionString]
+        } else {
+            description = nil
+        }
+        
+        // Decode other properties normally
+        brand = try? container.decode(String.self, forKey: .brand)
+        manufacturer = try? container.decode(String.self, forKey: .manufacturer)
+        mpn = try? container.decode(String.self, forKey: .mpn)
+        features = try? container.decode([String].self, forKey: .features)
+        itemWeight = try? container.decode(String.self, forKey: .itemWeight)
+        partNumber = try? container.decode(String.self, forKey: .partNumber)
+        size = try? container.decode(String.self, forKey: .size)
+        ingredients = try? container.decode(String.self, forKey: .ingredients)
+        directions = try? container.decode(String.self, forKey: .directions)
+        warning = try? container.decode(String.self, forKey: .warning)
+        label = try? container.decode(String.self, forKey: .label)
+        distributorAddress = try? container.decode(String.self, forKey: .distributorAddress)
+        distributorName = try? container.decode(String.self, forKey: .distributorName)
+        gender = try? container.decode(String.self, forKey: .gender)
+        formulation = try? container.decode(String.self, forKey: .formulation)
+        usage = try? container.decode(String.self, forKey: .usage)
+        spf = try? container.decode(String.self, forKey: .spf)
+        volume = try? container.decode(String.self, forKey: .volume)
+        color = try? container.decode(String.self, forKey: .color)
+        material = try? container.decode(String.self, forKey: .material)
+        model = try? container.decode(String.self, forKey: .model)
+        age = try? container.decode(String.self, forKey: .age)
     }
 }
+
+
 
 struct StoreInfo: Codable, Identifiable {
     let id = UUID()
@@ -78,11 +122,9 @@ struct Price: Codable {
         case price
     }
     
-    // Custom decoding initializer
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // Decode as String, falling back to Double if String fails
         list = try? container.decode(String.self, forKey: .list) ??
                (try? String(container.decode(Double.self, forKey: .list)))
         
@@ -96,7 +138,6 @@ struct Price: Codable {
         perUnit = try? container.decode(String.self, forKey: .perUnit)
     }
     
-    // Custom memberwise initializer
     init(list: String?, sale: String?, currency: String?, perUnit: String?, price: String?) {
         self.list = list
         self.sale = sale

@@ -11,7 +11,7 @@ struct ReviewResponse: Codable {
     let status: String
     let requestId: String
     let parameters: ReviewParameters
-    let data: ReviewData
+    var data: ReviewData
 
     enum CodingKeys: String, CodingKey {
         case status
@@ -47,7 +47,7 @@ struct ReviewData: Codable {
     let totalRatings: Int
     let country: String
     let domain: String
-    let reviews: [Review]
+    var reviews: [Review]
 
     enum CodingKeys: String, CodingKey {
         case asin, totalReviews = "total_reviews", totalRatings = "total_ratings"
@@ -69,6 +69,8 @@ struct Review: Codable, Identifiable {
     let reviewedProductAsin: String
     let reviewImages: [String]
     let reviewVideo: ReviewVideo?
+    var credibilityScore: Double? // New property to store credibility score
+
 
     enum CodingKeys: String, CodingKey {
         case id = "review_id"

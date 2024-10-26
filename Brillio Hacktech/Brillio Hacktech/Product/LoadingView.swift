@@ -37,10 +37,11 @@ struct LoadingView: View {
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: customBackButton)
             .navigationDestination(isPresented: $showProduct) {
-                if let product = productInfo, let review = reviews {
-                    ProductView(product: product, reviews: review)
+                if let product = productInfo {
+                    ProductView(product: product, reviews: reviews ?? [])
                 }
             }
+
         }
     }
 
@@ -59,6 +60,7 @@ struct LoadingView: View {
         guard let url = URL(string: "https://big-product-data.p.rapidapi.com/gtin/\(scannedCode)") else {
             errorMessage = "Invalid URL"
             isLoading = false
+            print("Error: Invalid URL constructed with scanned code: \(scannedCode)")
             return
         }
 
@@ -72,14 +74,18 @@ struct LoadingView: View {
                 if let error = error {
                     self.errorMessage = "Network error: \(error.localizedDescription)"
                     self.isLoading = false
+                    print("Error: Network error - \(error.localizedDescription)")
                     return
                 }
 
                 guard let data = data else {
                     self.errorMessage = "No data received from server"
                     self.isLoading = false
+                    print("Error: No data received from server")
                     return
                 }
+
+                print("Received data: \(String(data: data, encoding: .utf8) ?? "Unable to decode data as string")")
 
                 do {
                     let decoder = JSONDecoder()
@@ -87,17 +93,26 @@ struct LoadingView: View {
                     let product = try decoder.decode(ProductInfo.self, from: data)
                     self.productInfo = product
                     
-                    
                     if let asin = product.stores.first?.asin, let country = getCountryCode(for: product.stores.first?.store) {
+                        print("Fetched ASIN: \(asin), Country: \(country)")
                         fetchProductReviews(asin: asin, country: country)
+                    } else {
+                        print("No ASIN or country code found, displaying product info.")
+                        self.showProduct = true // Ensuring the view transitions even without ASIN
+                        self.hasLoaded = true
+                        self.isLoading = false // Stop the loading indicator
                     }
                 } catch {
                     self.errorMessage = "Decoding error: \(error.localizedDescription)"
+                    print("Error: Decoding error - \(error.localizedDescription)")
+                    self.isLoading = false
                 }
+
                 self.isLoading = false
             }
         }.resume()
     }
+
 
     private func getCountryCode(for store: String?) -> String? {
         guard let store = store else { return nil }

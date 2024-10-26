@@ -36,9 +36,7 @@ struct ReviewBox: View {
                 Text(review.title)
                     .font(.headline)
                     .padding(.top, 4)
-                Text(review.reviewDate)
-                    .font(.caption)
-                    .padding(.top, 4)
+                
             }
             
             // Credibility Score Progress Bar
@@ -56,23 +54,26 @@ struct ReviewBox: View {
             
             // Review Content
             Text(review.comment)
-                .lineLimit(isExpanded ? nil : 3)
+                //.lineLimit(isExpanded ? nil : 3)
                 .padding(.top, 4)
                 .font(.body)
                 .foregroundColor(.primary)
                 .animation(.easeInOut, value: isExpanded)
             
             // Show More Button
-            Button(action: {
-                withAnimation {
-                    isExpanded.toggle()
-                }
-            }) {
-                Text(isExpanded ? "Show Less" : "Show More")
-                    .font(.subheadline)
-                    .foregroundColor(.blue)
-                    .padding(.top, 4)
-            }
+//            Button(action: {
+//                withAnimation {
+//                    isExpanded.toggle()
+//                }
+//            }) {
+//                Text(isExpanded ? "Show Less" : "Show More")
+//                    .font(.subheadline)
+//                    .foregroundColor(.blue)
+//                    .padding(.top, 4)
+//            }
+            Text(review.reviewDate)
+                .font(.caption)
+                .padding(.top, 4)
         }
         .padding()
         .background(Color(UIColor.systemBackground))
@@ -117,16 +118,46 @@ struct ReviewBox: View {
             let input = FakeReviewClassifier_with_labelsInput(input: inputArray)
             let output = try await model.prediction(input: input)
 
-            // Step 6: Retrieve prediction label and credibility score
-            let predictionLabel = output.classLabel
-            let credibility = output.classLabel_probs[predictionLabel] ?? 0.0
-            print("Debug: Prediction Label: \(predictionLabel)")
-            print("Debug: Credibility Score: \(credibility)")
+            // Step 6: Retrieve raw class probabilities
+            let classProbs = output.classLabel_probs
+            print("Debug: Raw Class Probabilities: \(classProbs)")
 
-            // Step 7: Update UI with prediction results
+            // Step 7: Normalize probabilities if needed
+            let totalProb = classProbs.values.reduce(0.0, +)
+            
+            // Apply softmax if the total probability is not approximately 1
+            var normalizedProbs: [String: Double]
+            if abs(totalProb - 1.0) > 0.01 {
+                // Softmax Transformation
+                let expValues = classProbs.mapValues { exp($0) }
+                let expSum = expValues.values.reduce(0.0, +)
+                normalizedProbs = expValues.mapValues { $0 / expSum }
+                print("Debug: Softmax Probabilities: \(normalizedProbs)")
+            } else {
+                // Already normalized, so use directly
+                normalizedProbs = classProbs
+            }
+
+            // Step 8: Calculate credibility score based on normalized probabilities
+            let predictionLabel = output.classLabel
+            let confidence = normalizedProbs[predictionLabel] ?? 0.0
+
+            // Adjust credibility score based on the prediction label
+            let credibility: Double
+            if predictionLabel == "OR" {
+                credibility = confidence // Use confidence directly for "OR"
+            } else {
+                credibility = 1.0 - confidence // Use 1 - confidence for "CG"
+            }
+
+            print("Debug: Prediction Label: \(predictionLabel)")
+            print("Debug: Final Confidence Score: \(confidence)")
+            print("Debug: Adjusted Credibility Score: \(credibility)")
+
+            // Step 9: Update UI with prediction results
             DispatchQueue.main.async {
-                credibilityScore = credibility // Assign credibility score
-                predictionResult = predictionLabel == "GO" ? "Authentic" : "Fake"
+                credibilityScore = credibility // Assign adjusted credibility score
+                predictionResult = predictionLabel == "OR" ? "Authentic" : "Fake"
             }
             
         } catch {

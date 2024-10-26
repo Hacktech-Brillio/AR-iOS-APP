@@ -27,19 +27,19 @@ struct ContentView: View {
                 }
 
                 VStack {
-                    HStack {
-                        Button(action: {
-                            // History button action (to be implemented)
-                        }) {
-                            Image(systemName: "clock")
-                                .font(.title)
-                                .foregroundColor(.white)
-                                .padding()
-                        }
-                        .padding(.leading, 20)
-
-                        Spacer()
-                    }
+//                    HStack {
+//                        Button(action: {
+//                            // History button action (to be implemented)
+//                        }) {
+//                            Image(systemName: "clock")
+//                                .font(.title)
+//                                .foregroundColor(.white)
+//                                .padding()
+//                        }
+//                        .padding(.leading, 20)
+//
+//                        Spacer()
+//                    }
                     Spacer()
                     Image(systemName: "viewfinder.rectangular")
                         .resizable()
