@@ -17,6 +17,8 @@ struct LoadingView: View {
     @State private var hasLoaded = false // Track if the product data has already loaded
     let scannedCode: String
 
+    @Environment(\.dismiss) var dismiss
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -32,6 +34,10 @@ struct LoadingView: View {
                 }
             }
             .onAppear(perform: loadProductData)
+            .navigationBarBackButtonHidden(true)
+            .navigationBarItems(
+                leading: customBackButton
+            )
             .navigationDestination(isPresented: $showProduct) {
                 if let product = productInfo {
                     ProductView(product: product)
@@ -40,6 +46,17 @@ struct LoadingView: View {
         }
     }
 
+    private var customBackButton: some View {
+        Button(action: {
+            dismiss()
+        }) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.blueish)
+            
+        }
+    }
+    
     private func loadProductData() {
         // Prevent repeated loading for the same scanned code
         guard !hasLoaded else { return }
@@ -53,8 +70,12 @@ struct LoadingView: View {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
+        let headers = [
+            "x-rapidapi-key": "928c1149famsh602b67cfa1f7304p1b9c0cjsn85600746979e",
+            "x-rapidapi-host": "big-product-data.p.rapidapi.com"
+        ]
         // Replace with your actual API key and host
-        request.setValue("64e6766ee2msh186a35e81c043bdp12e2f2jsn8675b3d91c68", forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue("928c1149famsh602b67cfa1f7304p1b9c0cjsn85600746979e", forHTTPHeaderField: "x-rapidapi-key")
         request.setValue("big-product-data.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
 
         URLSession.shared.dataTask(with: request) { data, response, error in

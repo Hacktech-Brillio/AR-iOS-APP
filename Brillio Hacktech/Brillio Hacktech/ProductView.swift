@@ -12,89 +12,144 @@ import SwiftUI
 struct ProductView: View {
     let product: ProductInfo
 
+    @State var showInfoVew: Bool = false
+    @Environment(\.dismiss) var dismiss
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            ScrollView{
-                HStack{
-                    Spacer()
-                    AuthorizedAsyncImage(name: product.stores.first?.image ?? "")
-                        .frame(height: 250)
-                    Spacer()
-
-                }
-                ZStack{
-                    VStack{
-                        Text(product.properties.description?.first ?? "Unknown Product")
-                            .font(.body)
-                            .padding(.bottom, 8)
-
-                        HStack{
-                            Text("Features")
-                                .font(.headline)
-                            Spacer()
-                        }
-                        ForEach(product.properties.features ?? [], id: \.self) { feature in
-                            HStack{
-                                Spacer()
-                                InfoRow(icon: "circle.fill", value: feature)
-                                Spacer()
+            HStack{
+                Spacer()
+                AuthorizedAsyncImage(name: product.stores.first?.image ?? "")
+                    .frame(height: 200)
+                Spacer()
+                
+            }
+            
+            ScrollView(.horizontal) {
+                HStack(spacing: 15) {
+                    ForEach(product.stores.sorted { ($0.price?.list != nil) && ($1.price?.list == nil) }) { store in
+                        if !store.url.isEmpty, let url = URL(string: store.url) {
+                            Button(action: {
+                                UIApplication.shared.open(url)
+                                print(url)
+                            }) {
+                                StoreInfoView(storeInfo: store)
                             }
+                        } else {
+                            StoreInfoView(storeInfo: store)
                         }
-                        Spacer()
                     }
                 }
             }
-//            ScrollView {
-//                VStack(alignment: .leading, spacing: 8) {
-//                    InfoRow(icon: "tag", label: "Brand", value: product.properties.brand)
-//                    InfoRow(icon: "person.3", label: "Manufacturer", value: product.properties.manufacturer)
-//                    InfoRow(icon: "number", label: "MPN", value: product.properties.mpn)
-//                    InfoRow(icon: "list.bullet", label: "Features", value: product.properties.features?.joined(separator: ", "))
-//                    InfoRow(icon: "scalemass", label: "Item Weight", value: product.properties.itemWeight)
-//                    InfoRow(icon: "pencil.and.outline", label: "Part Number", value: product.properties.partNumber)
-//                    InfoRow(icon: "ruler", label: "Size", value: product.properties.size)
-//                    InfoRow(icon: "leaf", label: "Ingredients", value: product.properties.ingredients)
-//                    InfoRow(icon: "book", label: "Directions", value: product.properties.directions)
-//                    InfoRow(icon: "exclamationmark.triangle", label: "Warning", value: product.properties.warning)
-//                }
-//                .padding()
-//            }
-//            .background(Color(UIColor.secondarySystemBackground))
-//            .cornerRadius(12)
-//            .shadow(radius: 5)
+            .padding(.horizontal)
+
+
+
+
+            ZStack{
+                RoundedRectangle(cornerRadius: 20)
+                    .edgesIgnoringSafeArea(.bottom)
+                    .foregroundStyle(.bar)
+                ScrollView{
+                    VStack{
+                        
+                        ContentViewReviews()
+                    }
+                }
+            }
         }
-        .padding(.horizontal)
-        .onAppear{
-            print(product)
+        .sheet(isPresented: $showInfoVew) {
+            MoreInfoView(product: product)
         }
         .navigationTitle(product.properties.manufacturer ?? "")
+        .navigationBarItems(
+            leading: customBackButton,
+            trailing: customRightButton
+        )
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+
+    }
+    
+    private var customBackButton: some View {
+        Button(action: {
+            dismiss()
+        }) {
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(.blueish)
+            
+        }
+    }
+    
+    // Custom Right Button
+    private var customRightButton: some View {
+        Button(action: {
+            showInfoVew = true
+        }) {
+            Image(systemName: "info") // Replace with desired icon
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.blueish) // Customize color
+        }
     }
 }
 
 struct InfoRow: View {
     let icon: String
+    let label: String
     let value: String?
-    
+
     var body: some View {
         HStack(alignment: .top) {
-            VStack{
-                Spacer()
-                Image(systemName: icon)
-                    .foregroundColor(.cyan)
-                    .frame(width: 24)
-                Spacer()
-            }
-            
-            VStack{
-                Spacer()
+            Image(systemName: icon)
+                .foregroundColor(.blueish)
+                .frame(width: 24)
+            VStack(alignment: .leading) {
+                Text(label)
+                    .font(.headline)
                 Text(value ?? "N/A")
                     .font(.body)
-                    .foregroundColor(.primary)
-                Spacer()
             }
             Spacer()
         }
+    }
+}
+
+struct StoreInfoView: View {
+    let storeInfo: StoreInfo
+    
+    var body: some View {
+
+        ZStack{
+            RoundedRectangle(cornerRadius: 15)
+                .foregroundStyle(.bar)
+            HStack(alignment: .top) {
+                //AuthorizedAsyncImage(name: storeInfo.image ?? "")
+                
+                VStack{
+                    Spacer()
+                    HStack{
+                        Text(storeInfo.store)
+                            .font(.headline)
+                            .foregroundStyle(.blueish)
+                        Spacer()
+                    }
+                    
+                    if storeInfo.price?.list != nil{
+                        HStack{
+                            Text("\(storeInfo.price?.list ?? "") \(storeInfo.price?.currency ?? "")")
+                                .font(.body)
+                                .foregroundColor(.primary)
+                            Spacer()
+                        }
+                    }
+                    Spacer()
+
+                }
+            }
+            .padding(.horizontal)
+        }
+        .frame(height: 80)
     }
 }
 

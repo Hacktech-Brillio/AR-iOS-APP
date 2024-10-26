@@ -50,7 +50,8 @@ struct ProductProperties: Codable {
     }
 }
 
-struct StoreInfo: Codable {
+struct StoreInfo: Codable, Identifiable {
+    let id = UUID()
     let store: String
     let image: String?
     let url: String
