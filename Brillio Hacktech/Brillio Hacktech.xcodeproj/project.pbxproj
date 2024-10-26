@@ -12,6 +12,7 @@
 
 /* Begin PBXFileReference section */
 		90C916CE2CCBD77700C57C8D /* Brillio Hacktech.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Brillio Hacktech.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		90D005D22CCD85B5001BD9F9 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -38,6 +39,7 @@
 			isa = PBXGroup;
 			children = (
 				90C916D02CCBD77700C57C8D /* Brillio Hacktech */,
+				90D005D12CCD85B5001BD9F9 /* Packages */,
 				90C916CF2CCBD77700C57C8D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -48,6 +50,14 @@
 				90C916CE2CCBD77700C57C8D /* Brillio Hacktech.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		90D005D12CCD85B5001BD9F9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				90D005D22CCD85B5001BD9F9 /* RealityKitContent */,
+			);
+			path = Packages;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
