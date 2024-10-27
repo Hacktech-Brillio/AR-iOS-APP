@@ -92,16 +92,21 @@ struct LoadingView: View {
                     decoder.keyDecodingStrategy = .convertFromSnakeCase
                     let product = try decoder.decode(ProductInfo.self, from: data)
                     self.productInfo = product
-                    
-                    if let asin = product.stores.first?.asin, let country = getCountryCode(for: product.stores.first?.store) {
-                        print("Fetched ASIN: \(asin), Country: \(country)")
-                        fetchProductReviews(asin: asin, country: country)
-                    } else {
-                        print("No ASIN or country code found, displaying product info.")
-                        self.showProduct = true // Ensuring the view transitions even without ASIN
-                        self.hasLoaded = true
-                        self.isLoading = false // Stop the loading indicator
+
+                    // Iterate over stores to find the first ASIN and country code
+                    for store in product.stores {
+                        if let asin = store.asin, let country = getCountryCode(for: store.store) {
+                            print("Fetched ASIN: \(asin), Country: \(country)")
+                            fetchProductReviews(asin: asin, country: country)
+                            return // Stop as soon as an ASIN is found
+                        }
                     }
+
+                    print("No ASIN or country code found, displaying product info.")
+                    self.showProduct = true // Ensuring the view transitions even without ASIN
+                    self.hasLoaded = true
+                    self.isLoading = false // Stop the loading indicator
+
                 } catch {
                     self.errorMessage = "Decoding error: \(error.localizedDescription)"
                     print("Error: Decoding error - \(error.localizedDescription)")

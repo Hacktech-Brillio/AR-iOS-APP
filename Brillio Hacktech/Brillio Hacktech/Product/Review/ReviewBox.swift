@@ -60,17 +60,6 @@ struct ReviewBox: View {
                 .foregroundColor(.primary)
                 .animation(.easeInOut, value: isExpanded)
             
-            // Show More Button
-//            Button(action: {
-//                withAnimation {
-//                    isExpanded.toggle()
-//                }
-//            }) {
-//                Text(isExpanded ? "Show Less" : "Show More")
-//                    .font(.subheadline)
-//                    .foregroundColor(.blue)
-//                    .padding(.top, 4)
-//            }
             Text(review.reviewDate)
                 .font(.caption)
                 .padding(.top, 4)
