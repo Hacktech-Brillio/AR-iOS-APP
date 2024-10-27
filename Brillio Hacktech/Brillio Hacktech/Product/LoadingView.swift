@@ -66,7 +66,7 @@ struct LoadingView: View {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("928c1149famsh602b67cfa1f7304p1b9c0cjsn85600746979e", forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue("b10c803e97mshf571b2ec065143fp18b17fjsnf880a57cf8bc", forHTTPHeaderField: "x-rapidapi-key")
         request.setValue("big-product-data.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
@@ -145,7 +145,7 @@ struct LoadingView: View {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("928c1149famsh602b67cfa1f7304p1b9c0cjsn85600746979e", forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue("b10c803e97mshf571b2ec065143fp18b17fjsnf880a57cf8bc", forHTTPHeaderField: "x-rapidapi-key")
         request.setValue("real-time-amazon-data.p.rapidapi.com", forHTTPHeaderField: "x-rapidapi-host")
 
         URLSession.shared.dataTask(with: request) { data, response, error in
